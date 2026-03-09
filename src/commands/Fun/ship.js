@@ -1,115 +1,17 @@
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
-  name: "ship",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('ship')
+    .setDescription('Check ship compatibility between two users')
+    .addUserOption(opt => opt.setName('user1').setDescription('First user').setRequired(true))
+    .addUserOption(opt => opt.setName('user2').setDescription('Second user').setRequired(true)),
 
-  async run(client, message, args) {
-    let words = [
-        '1% ship',
-        '2% ship',
-        '3% ship',
-        '4% ship',
-        '5% ship',
-        '6% ship',
-        '7% ship',
-        '8% ship',
-        '9% ship',
-        '10% ship',
-        '11% ship',
-        '12% ship',
-        '13% ship',
-        '14% ship',
-        '15% ship',
-        '16% ship',
-        '17% ship',
-        '18% ship',
-        '19% ship',
-        '20% ship',
-        '21% ship',
-        '22% ship',
-        '23% ship',
-        '24% ship',
-        '25% ship',
-        '26% ship',
-        '27% ship',
-        '28% ship',
-        '29% ship',
-        '30% ship',
-        '31% ship',
-        '32% ship',
-        '33% ship',
-        '34% ship',
-        '35% ship',
-        '36% ship',
-        '37% ship',
-        '38% ship',
-        '39% ship',
-        '40% ship',
-        '41% ship',
-        '42% ship',
-        '43% ship',
-        '44% ship',
-        '45% ship',
-        '46% ship',
-        '47% ship',
-        '48% ship',
-        '49% ship',
-        '50% ship',
-        '51% ship',
-        '52% ship',
-        '53% ship',
-        '54% ship',
-        '55% ship',
-        '56% ship',
-        '57% ship',
-        '58% ship',
-        '59% ship',
-        '60% ship',
-        '61% ship',
-        '62% ship',
-        '63% ship',
-        '64% ship',
-        '65% ship',
-        '66% ship',
-        '67% ship',
-        '68% ship',
-        '69% ship **LEGENDARY**',
-        '70% ship',
-        '71% ship',
-        '72% ship',
-        '73% ship',
-        '74% ship',
-        '75% ship',
-        '76% ship',
-        '77% ship',
-        '78% ship',
-        '79% ship',
-        '80% ship',
-        '81% ship',
-        '82% ship',
-        '83% ship',
-        '84% ship',
-        '85% ship',
-        '86% ship',
-        '87% ship',
-        '88% ship',
-        '89% ship',
-        '90% ship',
-        '91% ship',
-        '92% ship',
-        '93% ship',
-        '94% ship',
-        '95% ship',
-        '96% ship',
-        '97% ship',
-        '98% ship',
-        '99% ship',
-        '100% ship  ~~WOW SO LOVELY~~'];
-        let shipre = words[Math.floor(Math.random() * words.length)]
-        message.channel.send(shipre);
-
-        console.log('KEWL BOT    | SHIP COMMAND USED IN ' + message.guild.name);
+  async run(client, interaction) {
+    const user1 = interaction.options.getUser('user1');
+    const user2 = interaction.options.getUser('user2');
+    const percent = Math.floor(Math.random() * 100) + 1;
+    const suffix = percent === 69 ? ' **LEGENDARY**' : percent === 100 ? ' ~~WOW SO LOVELY~~' : '';
+    await interaction.reply(`💕 ${user1.username} + ${user2.username} = ${percent}% ship${suffix}`);
   }
-}
+};

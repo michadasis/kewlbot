@@ -1,12 +1,10 @@
+const SUGGESTIONS_CHANNEL_ID = '850851652482498590';
+
 module.exports = (client) => {
-    client.on('message', (message) => {
-        let guild = client.guilds.cache.get('839447938731212810')
-
-        let c = guild.channels.cache.find((c) => c.id === '850851652482498590')
-
-        if(message.channel.id === c.id) {
-          message.react('✅')
-          message.react('❎')
-        }
-    })
-}
+  client.on('messageCreate', async (message) => {
+    if (message.channel.id === SUGGESTIONS_CHANNEL_ID && !message.author.bot) {
+      await message.react('✅');
+      await message.react('❎');
+    }
+  });
+};

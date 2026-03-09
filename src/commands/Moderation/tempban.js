@@ -1,35 +1,30 @@
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const ms = require('ms');
 
 module.exports = {
-  name: "tempban",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('tempban')
+    .setDescription('Temporarily ban a member')
+    .addUserOption(opt => opt.setName('user').setDescription('User to ban').setRequired(true))
+    .addStringOption(opt => opt.setName('duration').setDescription('Duration e.g. 1h, 30m, 1d').setRequired(true))
+    .addStringOption(opt => opt.setName('reason').setDescription('Reason for ban'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
 
-  async run(client, message, args) {
-    if(!message.member.hasPermission(["BAN_MEMBERS"])) return message.channel.send("You do not have permission to perform this command!")
-        var person  = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[0]));
-            if(!person) return  message.reply("Sorry I can't find them.").catch(err => console.log(err))
- 
+  async run(client, interaction) {
+    const target = interaction.options.getMember('user');
+    const duration = interaction.options.getString('duration');
+    const reason = interaction.options.getString('reason') || 'No reason given.';
+    const time = ms(duration);
 
- 
- 
-            let time = args[1];
-            if(!time){
-                return message.reply("You didn't specify a time!").catch(err => console.log(err));
-            }
- 
-            message.guild.members.ban(person).catch(err => console.log(err))
- 
- 
-            message.channel.send(`@${person.user.tag} has now been banned for ${ms(ms(time))}`)
- 
-            setTimeout(function(){
-               
-                message.guild.members.unban(person);
-                message.channel.send(`@${person.user.tag} has been unbanned.`).catch(err => console.log(err))
-            }, ms(time));
- 
-            console.log('KEWL BOT    | TEMPBAN COMMAND USED IN ' + message.guild.name)
+    if (!target) return interaction.reply({ content: "User not found.", ephemeral: true });
+    if (!time) return interaction.reply({ content: "Invalid duration. Use formats like `1h`, `30m`, `1d`.", ephemeral: true });
+
+    await interaction.guild.members.ban(target, { reason });
+    await interaction.reply(`🔨 **${target.user.tag}** has been temp-banned for **${ms(time, { long: true })}**. Reason: ${reason}`);
+
+    setTimeout(async () => {
+      await interaction.guild.members.unban(target.id).catch(() => {});
+      await interaction.channel.send(`✅ **${target.user.tag}**'s temp-ban has expired and they have been unbanned.`).catch(() => {});
+    }, time);
   }
-}
+};

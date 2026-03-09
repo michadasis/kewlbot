@@ -1,40 +1,36 @@
-
-    //const { Discord } = require('discord.js')
-    const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
-  name: "kick",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('kick')
+    .setDescription('Kick a member from the server')
+    .addUserOption(opt => opt.setName('user').setDescription('User to kick').setRequired(true))
+    .addStringOption(opt => opt.setName('reason').setDescription('Reason for kick'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
 
-  async run(client, message, args, Discord) {
-    if(!message.member.hasPermission(["KICK_MEMBERS"])) return message.channel.send("You do not have permission to perform this command!")
- 
-        let banMember = message.mentions.members.first() || message.guild.members.get(args[0]);
-        if(!banMember) return message.channel.send("Please provide a user to be kicked in a mention")
-     
-        let reason = args.slice(1).join(" ");
-        if(!reason) reason = "No reason given by the moderator."
-     
-        if(!message.guild.me.hasPermission(["KICK_MEMBERS", "ADMINISTRATOR"])) return message.channel.send("I do not have permission to perform the ban command!")
-     
-        
-     if (reason) undefined;
-        
-        banMember.send(`Hello, you have been kicked from ${message.guild.name} for: ${reason}`).then(() =>
-        banMember.kick())
-        const embed = new MessageEmbed()
-        .setTitle('kicked a member')
-        .setDescription(`${banMember} was successfully kicked.`)
-        .addField('Moderator', message.member, true)
-        .addField('Member', banMember, true)
-        .addField('Reason', reason)
-        .setFooter(message.member.displayName,  message.author.displayAvatarURL({ dynamic: true }))
-        .setTimestamp()
-        .setColor(message.guild.me.displayHexColor);
-        message.channel.send(embed)
-        
-        
+  async run(client, interaction) {
+    const target = interaction.options.getMember('user');
+    const reason = interaction.options.getString('reason') || 'No reason given by the moderator.';
 
-        console.log('KEWL BOT    | KICK COMMAND USED IN ' + message.guild.name)
+    if (!target) return interaction.reply({ content: "User not found in this server.", ephemeral: true });
+    if (!interaction.guild.members.me.permissions.has("KickMembers")) {
+      return interaction.reply({ content: "I don't have permission to kick members.", ephemeral: true });
+    }
+
+    await target.send(`You have been kicked from **${interaction.guild.name}** for: ${reason}.`).catch(() => {});
+    await target.kick(reason);
+
+    const embed = new EmbedBuilder()
+      .setTitle('👢 Member Kicked')
+      .setDescription(`${target} was successfully kicked.`)
+      .addFields(
+        { name: 'Moderator', value: `${interaction.user}`, inline: true },
+        { name: 'Member', value: `${target}`, inline: true },
+        { name: 'Reason', value: reason },
+      )
+      .setFooter({ text: interaction.user.tag, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
+      .setTimestamp()
+      .setColor(0xFF6600);
+    await interaction.reply({ embeds: [embed] });
   }
-}
+};

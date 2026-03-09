@@ -1,14 +1,15 @@
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
-  name: "clear",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('clear')
+    .setDescription('Bulk delete messages (1-100)')
+    .addIntegerOption(opt => opt.setName('amount').setDescription('Number of messages to delete').setRequired(true).setMinValue(1).setMaxValue(100))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
 
-  async run(client, message, args) {
-        if(!message.member.hasPermission(["MANAGE_MESSAGES"])) return message.channel.send("You do not have permission to perform this command!")
-    //if(!args[2]) return('Please Provide an Amount of messages to delete!'+ message.author)
-      message.channel.bulkDelete(message.content.replace('K!clear ', "")).catch(err => console.log(err))
-      message.channel.send('✅Successfully Deleted '+ message.content.replace('K!clear ', "")+ ' messages.').catch(err => console.log(err))
+  async run(client, interaction) {
+    const amount = interaction.options.getInteger('amount');
+    await interaction.channel.bulkDelete(amount, true).catch(err => console.log(err));
+    await interaction.reply({ content: `✅ Deleted **${amount}** messages.`, ephemeral: true });
   }
-}
+};

@@ -1,15 +1,21 @@
-
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 module.exports = {
-  name: "poll",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('poll')
+    .setDescription('Create a poll')
+    .addStringOption(opt => opt.setName('question').setDescription('The poll question').setRequired(true)),
 
-  async run(client, message, args) {
-    message.author.send("Successfully Created Your Poll!")
-            message.react('✅')
-            .then(message.react('❌'))
-            console.log('KEWL BOT    | POLL COMMAND USED IN ' + message.guild.name)
+  async run(client, interaction) {
+    const question = interaction.options.getString('question');
+    const embed = new EmbedBuilder()
+      .setTitle('📊 Poll')
+      .setDescription(question)
+      .setColor('Random')
+      .setFooter({ text: `Poll by ${interaction.user.tag}` })
+      .setTimestamp();
+    const msg = await interaction.reply({ embeds: [embed], fetchReply: true });
+    await msg.react('✅');
+    await msg.react('❌');
   }
-}
+};

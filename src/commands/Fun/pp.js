@@ -1,38 +1,18 @@
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 module.exports = {
-  name: "pp",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('pp')
+    .setDescription('Check pp size')
+    .addUserOption(opt => opt.setName('user').setDescription('User to check (defaults to you)')),
 
-  async run(client, message, args) {
-    let taggedUser = message.mentions.users.first() || message.author;
-    let words = [
-        "8D",
-        "8=D",
-        "8==D",
-        "8===D",
-        "8====D",
-        "8=====D",
-        "8======D",
-        '8=======D',
-        '8========D',
-        '8=========D',
-        '8==========D',
-        '8===========D',
-        '8============D',
-        '8=============D',
-        '8==============D',
-        '8===============D',
-        '8================D'
-        ]
-  
-        let pp = words[Math.floor(Math.random() * words.length)]
-    const ragecmd = new MessageEmbed()
-            .setTitle(`peepee size machine`)
-            .setDescription(`${taggedUser}'s penis ${pp}`)
-            message.channel.send(ragecmd)
-
-            console.log('KEWL BOT    | PP COMMAND USED IN ' + message.guild.name)
+  async run(client, interaction) {
+    const target = interaction.options.getUser('user') || interaction.user;
+    const sizes = ["8D","8=D","8==D","8===D","8====D","8=====D","8======D","8=======D","8========D","8=========D","8==========D","8===========D","8============D","8=============D","8==============D","8===============D","8================D"];
+    const pp = sizes[Math.floor(Math.random() * sizes.length)];
+    const embed = new EmbedBuilder()
+      .setTitle('peepee size machine')
+      .setDescription(`${target}'s penis ${pp}`);
+    await interaction.reply({ embeds: [embed] });
   }
-}
+};

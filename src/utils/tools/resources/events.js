@@ -1,20 +1,18 @@
-const fs = require('fs')
-const ascii = require('ascii-table')
+const fs = require('fs');
+const ascii = require('ascii-table');
 
-module.exports = async(client) => {
-    let table = new ascii("Events");
-    table.setHeading('Event', ' Load status');
+module.exports = (client) => {
+  let table = new ascii("Events");
+  table.setHeading('Event', 'Load status');
 
-    fs.readdirSync(`./src/events/`).forEach((dir) => {
-      const directories = fs.readdirSync(`./src/events/${dir}`).filter((file) => file.endsWith('.js'))
-      for(let file of directories) {
-        const event = require(`../../../events/${dir}/${file}`)
+  fs.readdirSync(`./src/events/`).forEach((dir) => {
+    const files = fs.readdirSync(`./src/events/${dir}`).filter(f => f.endsWith('.js'));
+    for (const file of files) {
+      const event = require(`../../../events/${dir}/${file}`);
+      table.addRow(file, "✅");
+      event(client);
+    }
+  });
 
-        table.addRow(file, "✅");
-    
-        event(client)
-      }
-    })
-    
-    console.log(table.toString())
-}
+  console.log(table.toString());
+};

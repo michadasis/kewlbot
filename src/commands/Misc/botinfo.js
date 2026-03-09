@@ -1,26 +1,23 @@
-
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 module.exports = {
-  name: "botinfo",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('botinfo')
+    .setDescription('Info about KewlBot'),
 
-  async run(client, message, args) {
-   const botinfo = new MessageEmbed()
-   .setTitle('Kewl Bot Info')
-   .addField('About Kewl Bot' ,`Kewl Bot is a fun discord bot to help you express feelings with animated gif commands!`)
-   .addField('Moderation Commands',`There will be some moderation commands in the future but who knows we might cancel it because of our limited time.`)
-   .addField('Suggestions' ,`We are looking for ideas about emote commands to make more also when we get moderation commmands`)
-   .setDescription(
-  '[Invite Me :]](https://discordapp.com/oauth2/authorize?client_id=596554872564744232&scope=bot&permissions=470101062)\n[Vote Kewl Bot on Top.gg](https://top.gg/bot/596554872564744232/vote)\n[Vote Kewl Bot On Bots on Discord](https://bots.ondiscord.xyz/bots/596554872564744232)\n[Support Server](https://discord.gg/RvYXByR94G)\n[Follow The Owner](https://twitter.com/JohnGameRage)')
-   .setThumbnail('https://cdn.discordapp.com/avatars/596554872564744232/457b6ba261d03168e15cf22229cdbc3f.webp?size=512')
-   .setColor('RANDOM')
-   .setFooter('Kewl Bot Created By Michh#9683')
-   .setTimestamp()
-
-  message.channel.send(botinfo).catch(err => console.log(err))
-
-  console.log('KEWL BOT    | BOTINFO COMMAND USED IN ' + message.guild.name)
+  async run(client, interaction) {
+    const embed = new EmbedBuilder()
+      .setTitle('Kewl Bot Info')
+      .addFields(
+        { name: 'About', value: 'Kewl Bot is a fun discord bot to help you express feelings with animated gif commands!' },
+        { name: 'Moderation', value: 'Full moderation suite — ban, kick, mute, warn, and more.' },
+        { name: 'Suggestions', value: 'Use /suggest to submit ideas!' }
+      )
+      .setDescription('[Invite Me](https://discordapp.com/oauth2/authorize?client_id=596554872564744232&scope=bot&permissions=470101062)\n[Vote on Top.gg](https://top.gg/bot/596554872564744232/vote)\n[Support Server](https://discord.gg/RvYXByR94G)')
+      .setThumbnail(client.user.displayAvatarURL())
+      .setColor('Random')
+      .setFooter({ text: 'Kewl Bot Created By Michh#9683' })
+      .setTimestamp();
+    await interaction.reply({ embeds: [embed] });
   }
-}
+};

@@ -1,30 +1,18 @@
 {
-  "name": "bots",
-  "version": "1.0.0",
-  "description": "",
+  "name": "kewlbot",
+  "version": "3.0.0",
+  "description": "KewlBot with discord.js v14 slash commands",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Michadasis",
+  "license": "MIT",
   "dependencies": {
     "ascii-table": "0.0.9",
-    "cheerio": "^1.0.0-rc.10",
-    "discord.js": "^12.5.3",
-    "dotenv": "^10.0.0",
-    "express": "^4.17.1",
-    "minecraft-server-util": "^1.0.2",
-    "ms": "^2.1.2",
-    "node-fetch": "^2.6.1",
-    "node-gyp": "^5.0.7",
-    "querystring": "^0.2.0",
-    "quick.db": "^7.1.3",
-    "random-puppy": "^1.1.0",
-    "rebuild": "^0.1.2",
-    "reconlx": "^1.2.41",
-    "relevant-google": "^1.0.0",
-    "request": "^2.88.0",
-    "util": "^0.12.1"
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.2",
+    "ms": "^2.1.3"
   }
 }

@@ -1,13 +1,14 @@
-const { prefix } = "K!"
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
-  name: "nickme",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('nickme')
+    .setDescription('Change your nickname')
+    .addStringOption(opt => opt.setName('nickname').setDescription('Your new nickname').setRequired(true)),
 
-  async run(client, message, args) {
-    message.member.setNickname(message.content.replace(`K!nickme `, '')).catch(err => console.log(err))
-    message.reply(' Your nickname has been changed.');
-    console.log('KEWL BOT    | NICKME COMMAND USED IN ' + message.guild.name)
+  async run(client, interaction) {
+    const nick = interaction.options.getString('nickname');
+    await interaction.member.setNickname(nick).catch(() => {});
+    await interaction.reply({ content: `Your nickname has been changed to **${nick}**.`, ephemeral: true });
   }
-}
+};

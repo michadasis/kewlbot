@@ -1,34 +1,34 @@
-
-const { MessageEmbed } = require('discord.js')
-const rgx = /^(?:<@!?)?(\d+)>?$/;
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
-  name: "unban",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('unban')
+    .setDescription('Unban a user by their ID')
+    .addStringOption(opt => opt.setName('userid').setDescription('The ID of the user to unban').setRequired(true))
+    .addStringOption(opt => opt.setName('reason').setDescription('Reason for unban'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
 
-  async run(client, message, args) {
-           const id = args[0];
-    if (!rgx.test(id)) return message.channel.send('Please provide a valid user ID');
-    const bannedUsers = await message.guild.fetchBans();
-    const user = bannedUsers.get(id).user;
-    if (!user) return message.channel.send('Unable to find user, please check the provided ID');
+  async run(client, interaction) {
+    const id = interaction.options.getString('userid').replace(/[<@!>]/g, '');
+    const reason = interaction.options.getString('reason') || 'No reason given.';
 
-    let reason = args.slice(1).join(' ');
-    if (!reason) reason = 'No reason given by the moderator.';
-    if (reason.length > 1024) reason = reason.slice(0, 1021) + '...';
+    if (isNaN(id)) return interaction.reply({ content: "Please provide a valid user ID.", ephemeral: true });
 
-    await message.guild.members.unban(user, reason);
-    const embed = new MessageEmbed()
-      .setTitle('Unbanned a member')
-      .setDescription(`${user.tag} was successfully unbanned.`)
-      .addField('Moderator', message.member, true)
-      .addField('Member', user.tag, true)
-      .addField('Reason', reason)
-      .setFooter(message.member.displayName,  message.author.displayAvatarURL({ dynamic: true }))
+    const bans = await interaction.guild.bans.fetch();
+    const bannedUser = bans.get(id);
+    if (!bannedUser) return interaction.reply({ content: "That user is not banned.", ephemeral: true });
+
+    await interaction.guild.members.unban(id, reason);
+
+    const embed = new EmbedBuilder()
+      .setTitle('✅ Member Unbanned')
+      .setDescription(`**${bannedUser.user.tag}** was successfully unbanned.`)
+      .addFields(
+        { name: 'Moderator', value: `${interaction.user}`, inline: true },
+        { name: 'Reason', value: reason },
+      )
       .setTimestamp()
-      .setColor(message.guild.me.displayHexColor);
-
-    message.channel.send(embed);
-    console.log('KEWL BOT    | BAN COMMAND USED IN ' + message.guild.name)
+      .setColor(0x00FF00);
+    await interaction.reply({ embeds: [embed] });
   }
-}
+};

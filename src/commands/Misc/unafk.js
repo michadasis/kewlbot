@@ -1,13 +1,12 @@
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
-  name: "unafk",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('unafk')
+    .setDescription('Remove your AFK status'),
 
-  async run(client, message, args) {
-    message.member.setNickname(message.content.replace('K!unafk', `${message.author.username}`)).catch(err => console.log(err))
-    message.channel.send(message.author + ' Your [AFK] Tag has been removed.');
-    console.log('KEWL BOT    | UNAFK COMMAND USED IN ' + message.guild.name)
+  async run(client, interaction) {
+    await interaction.member.setNickname(interaction.user.username).catch(() => {});
+    await interaction.reply(`${interaction.user} Your [AFK] tag has been removed.`);
   }
-}
+};

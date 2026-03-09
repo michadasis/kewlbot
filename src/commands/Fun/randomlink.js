@@ -1,12 +1,11 @@
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
-  name: "uselessweb",
-  description: "",
+  data: new SlashCommandBuilder()
+    .setName('uselessweb')
+    .setDescription('Get a random useless website'),
 
-  async run(client, message, args) {
-    message.channel.send("https://theuselessweb.com/").catch(err => console.log(err))
-    console.log('KEWL BOT    | RANDOMLINK COMMAND USED IN ' + message.guild.name)
+  async run(client, interaction) {
+    await interaction.reply("https://theuselessweb.com/");
   }
-}
+};

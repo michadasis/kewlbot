@@ -1,14 +1,12 @@
-
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
-  name: "resetnick",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('resetnick')
+    .setDescription('Reset your nickname to your username'),
 
-  async run(client, message, args) {
-    message.member.setNickname(`${message.author.username}`).catch(err => console.log(err))
-    message.reply(' Your nickname has been reset.');
-    console.log('KEWL BOT    | RESETNICK COMMAND USED IN ' + message.guild.name)
+  async run(client, interaction) {
+    await interaction.member.setNickname(interaction.user.username).catch(() => {});
+    await interaction.reply({ content: 'Your nickname has been reset.', ephemeral: true });
   }
-}
+};

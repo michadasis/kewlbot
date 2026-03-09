@@ -1,21 +1,25 @@
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
 module.exports = {
-  name: "userinfo",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('userinfo')
+    .setDescription('Get info about a user')
+    .addUserOption(opt => opt.setName('user').setDescription('User to look up (defaults to you)')),
 
-  async run(client, message, args) {
-    const usera = message.mentions.users.first() || message.author;
-    const Embed = new MessageEmbed()
-                .setTitle(usera.username)
-                .addField('ID', usera.id)
-                .addField('Discrimination', usera.discriminator)
-                .addField('Account Creation', usera.createdAt)
-                .setFooter('Kewl Bot | Created by Michh#9683', client.user.displayAvatarUR)
-                .setTimestamp()
-                .setColor('RANDOM')
-                .setThumbnail(usera.avatarURL);
-                message.channel.send(Embed)
+  async run(client, interaction) {
+    const target = interaction.options.getUser('user') || interaction.user;
+    const member = interaction.guild.members.cache.get(target.id);
+    const embed = new EmbedBuilder()
+      .setTitle(target.username)
+      .setThumbnail(target.displayAvatarURL({ dynamic: true }))
+      .addFields(
+        { name: '🆔 ID', value: target.id, inline: false },
+        { name: '📅 Account Created', value: `<t:${Math.floor(target.createdTimestamp / 1000)}:F>`, inline: false },
+        { name: '📆 Joined Server', value: member ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` : 'Unknown', inline: false },
+      )
+      .setFooter({ text: 'Kewl Bot | Created by Michh#9683', iconURL: client.user.displayAvatarURL() })
+      .setTimestamp()
+      .setColor('Random');
+    await interaction.reply({ embeds: [embed] });
   }
-}
+};

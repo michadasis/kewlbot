@@ -1,39 +1,36 @@
-
-    //const { Discord } = require('discord.js')
-    const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
-  name: "ban",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('ban')
+    .setDescription('Ban a member from the server')
+    .addUserOption(opt => opt.setName('user').setDescription('User to ban').setRequired(true))
+    .addStringOption(opt => opt.setName('reason').setDescription('Reason for ban'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
 
-  async run(client, message, args, Discord) {
-    if(!message.member.hasPermission(["BAN_MEMBERS"])) return message.channel.send("You do not have permission to perform this command!")
- 
-        let banMember = message.mentions.members.first() || message.guild.members.get(args[0]);
-        if(!banMember) return message.channel.send("Please provide a user to be banned in a mention")
-     
-        let reason = args.slice(1).join(" ");
-        if(!reason) reason = "No reason given by the moderator"
-     
-        if(!message.guild.me.hasPermission(["BAN_MEMBERS", "ADMINISTRATOR"])) return message.channel.send("I do not have permission to perform the ban command!")
-        //if (banMember.hasPermission(["BAN_MEMBERS", "ADMINISTRATOR"]) || banMember.user.client)return message.channel.send(`Cannot ban ${banMember.user.username} either because he is a bot or has BAN_MEMBERS or has admin power that are higher.`).then(message.delete(10000);)
-     
-        
-     if (reason) undefined;
-        banMember.send(`Hello, you have been banned from ${message.guild.name} for: ${reason}.`).then(() =>
-        message.guild.members.ban(banMember, {years: 90, reason: reason})).catch(err => console.log(err))
-        const embed = new MessageEmbed()
-      .setTitle('Banned a member')
-      .setDescription(`${banMember} was successfully banned.`)
-      .addField('Moderator', message.member, true)
-      .addField('Member', banMember, true)
-      .addField('Reason', reason)
-      .setFooter(message.member.displayName,  message.author.displayAvatarURL({ dynamic: true }))
+  async run(client, interaction) {
+    const target = interaction.options.getMember('user');
+    const reason = interaction.options.getString('reason') || 'No reason given by the moderator.';
+
+    if (!target) return interaction.reply({ content: "User not found in this server.", ephemeral: true });
+    if (!interaction.guild.members.me.permissions.has("BanMembers")) {
+      return interaction.reply({ content: "I don't have permission to ban members.", ephemeral: true });
+    }
+
+    await target.send(`You have been banned from **${interaction.guild.name}** for: ${reason}.`).catch(() => {});
+    await interaction.guild.members.ban(target, { reason });
+
+    const embed = new EmbedBuilder()
+      .setTitle('🔨 Member Banned')
+      .setDescription(`${target} was successfully banned.`)
+      .addFields(
+        { name: 'Moderator', value: `${interaction.user}`, inline: true },
+        { name: 'Member', value: `${target}`, inline: true },
+        { name: 'Reason', value: reason },
+      )
+      .setFooter({ text: interaction.user.tag, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
       .setTimestamp()
-      .setColor(message.guild.me.displayHexColor);
-        message.channel.send(embed)
-        
-
-        console.log('KEWL BOT    | BAN COMMAND USED IN ' + message.guild.name)
+      .setColor(0xFF0000);
+    await interaction.reply({ embeds: [embed] });
   }
-}
+};

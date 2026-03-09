@@ -1,16 +1,14 @@
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
-  name: "ping",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('ping')
+    .setDescription('Check bot latency'),
 
-  async run(client, message, args) {
-    message.channel.send(`Hoold on!`).then(m => {
-        m.edit(`**Pong!**\nMessage edit time is ` + (message.createdTimestamp - message.createdTimestamp) + `ms, Discord API heartbeat is ` + Math.round(client.ping) + `ms.`).then(message.react('🏓'))
-            
-        });
-
-        console.log('KEWL BOT    | PING COMMAND USED IN ' + message.guild.name)
+  async run(client, interaction) {
+    await interaction.deferReply();
+    const latency = Date.now() - interaction.createdTimestamp;
+    const apiLatency = Math.round(client.ws.ping);
+    await interaction.editReply(`🏓 **Pong!**\nMessage latency: **${latency}ms** | API heartbeat: **${apiLatency}ms**`);
   }
-}
+};

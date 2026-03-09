@@ -1,27 +1,22 @@
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
-  name: "nuke",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('nuke')
+    .setDescription('Nuke (clone and delete) the current channel')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
 
-  async run(client, message, args) {
-let channel2 = message.guild.channels.find(
-  channel => channel.name.toLowerCase() === "nuking"
-)
- //if(channel2) {
-   //if (!message.member.hasPermission("MANAGE_CHANNELS")) return message.reply("You do not have permission to nuke this channel.");
-  //  if (!message.guild.member(client.user).hasPermission('MANAGE_CHANNELS')) return message.reply('Sorry, I dont have the permissions to do this command I need MANAGE_CHANNELS.')
-  //await message.channel.clone().then((ch) =>{ch.setParent(message.channel.parent.id);ch.setPosition//(message.channel.position); 
+  async run(client, interaction) {
+    if (!interaction.guild.members.me.permissions.has("ManageChannels")) {
+      return interaction.reply({ content: "I need the MANAGE_CHANNELS permission to do this.", ephemeral: true });
+    }
 
-    
-  //  ch.send('https://media.giphy.com/media/oe33xf3B50fsc/giphy.gif')}); message.channel.delete();
-  //}else {
-    if (!message.member.hasPermission("MANAGE_CHANNELS")) return message.reply("You do not have permission to nuke this channel.");
-    if (!message.guild.member(client.user).hasPermission('MANAGE_CHANNELS')) return message.reply('Sorry, I dont have the permissions to do this command I need MANAGE_CHANNELS.')
-  await message.channel.clone().then((ch) =>{ch.setParent(message.channel.parent.id);ch.setPosition(message.channel.position); 
-
-    
-    ch.send('https://media.giphy.com/media/oe33xf3B50fsc/giphy.gif')}); message.channel.delete();
-// }
-  }}
+    await interaction.reply({ content: '💣 Nuking...', ephemeral: true });
+    const channel = interaction.channel;
+    const clone = await channel.clone();
+    await clone.setParent(channel.parentId);
+    await clone.setPosition(channel.position);
+    await clone.send('https://media.giphy.com/media/oe33xf3B50fsc/giphy.gif');
+    await channel.delete();
+  }
+};

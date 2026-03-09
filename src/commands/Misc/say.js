@@ -1,16 +1,20 @@
-const prefix = "K!";
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+
+const blacklisted = ["596554872564744232", "661249728692092928", "222755040643907595", "305742353078157312"];
 
 module.exports = {
-  name: "say",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('say')
+    .setDescription('Make the bot say something')
+    .addStringOption(opt => opt.setName('message').setDescription('What to say').setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
 
-  async run(client, message, args) {
-    if(message.author.id === "596554872564744232")return(message.author + 'you have been blacklisted from using the say command because u abused it')
-        if(message.author.id === "661249728692092928")return(message.author + 'you have been blacklisted from using the say command because u abused it')
-        if(message.author.id === "222755040643907595")return(message.author + 'you have been blacklisted from using the say command because u abused it')
-        if(message.author.id === "305742353078157312")return(message.author + 'you have been blacklisted from using the say command because u abused it')
-    message.channel.send(message.content.replace(`${prefix}say `, '')).then(message.delete()).catch(err => console.log(err));
-    console.log('KEWL BOT    | SAY COMMAND USED IN ' + message.guild.name + " " + message.author.id)
+  async run(client, interaction) {
+    if (blacklisted.includes(interaction.user.id)) {
+      return interaction.reply({ content: "You have been blacklisted from using this command.", ephemeral: true });
+    }
+    const text = interaction.options.getString('message');
+    await interaction.reply({ content: '✅', ephemeral: true });
+    await interaction.channel.send(text);
   }
-}
+};

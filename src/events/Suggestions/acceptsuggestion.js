@@ -1,25 +1,23 @@
-const { MessageEmbed } = require('discord.js')
+const { EmbedBuilder } = require('discord.js');
 
 module.exports = (client) => {
-    client.on('messageReactionAdd', async(reaction, user) => {
-        if(reaction.message.partial) await reaction.message.fetch();
-        if(reaction.partial) await reaction.fetch();
-        if(user.bot) return;
-        if(!reaction.message.guild) return;
-        if(reaction.emoji.name === '✅') {
-            const suggestionChannel = reaction.message.guild.channels.cache.find(channel => channel.id === reaction.message.channel.id)
-            const suggestionEmbed = await suggestionChannel.messages.fetch(reaction.message.id)
-            const data = suggestionEmbed.embeds[0]
-            
-            const Embed = new MessageEmbed()
-                .setDescription(data.description)
-                .setColor(`000000`)
-                .setTimestamp()
-                .addField("Status", "Accepted")
+  client.on('messageReactionAdd', async (reaction, user) => {
+    if (reaction.message.partial) await reaction.message.fetch();
+    if (reaction.partial) await reaction.fetch();
+    if (user.bot) return;
+    if (!reaction.message.guild) return;
 
-            suggestionEmbed.edit(Embed)
-
-            suggestionEmbed.reactions.removeAll()
-        }
-    })
-}
+    if (reaction.emoji.name === '✅') {
+      const msg = reaction.message;
+      const data = msg.embeds[0];
+      if (!data) return;
+      const embed = new EmbedBuilder()
+        .setDescription(data.description)
+        .setColor(0x00FF00)
+        .setTimestamp()
+        .addFields({ name: "Status", value: "✅ Accepted" });
+      await msg.edit({ embeds: [embed] });
+      await msg.reactions.removeAll();
+    }
+  });
+};

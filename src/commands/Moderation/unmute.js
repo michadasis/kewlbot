@@ -1,21 +1,20 @@
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 
-    const { MessageEmbed } = require('discord.js')
+module.exports = {
+  data: new SlashCommandBuilder()
+    .setName('unmute')
+    .setDescription('Unmute a member')
+    .addUserOption(opt => opt.setName('user').setDescription('User to unmute').setRequired(true))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
 
-    module.exports = {
-      name: "unmute",
-      description: " ",
-    
-      async run(client, message, args) {
-        if(!message.member.hasPermission(["MANAGE_ROLES"])) return message.channel.send("You do not have permission to perform this command!")
-        var person  = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[1]))
-            if(!person) return  message.reply("Sorry I can't find them😅").catch(err => console.log(err))
- 
-            let role = message.guild.roles.cache.find(role => role.name === "Muted")
-           
-            if(!role) return message.channel.send(message.author + " Couldn't find the muted role.").catch(err => console.log(err))
-                person.roles.remove(role.id).catch(err => console.log(err));
-                message.channel.send(`@${person.user.tag} has been unmuted.`).catch(err => console.log(err))
+  async run(client, interaction) {
+    const target = interaction.options.getMember('user');
+    if (!target) return interaction.reply({ content: "User not found.", ephemeral: true });
 
-                console.log('KEWL BOT    | UNMUTE COMMAND USED IN ' + message.guild.name)
-      }
-    }
+    const role = interaction.guild.roles.cache.find(r => r.name === "Muted");
+    if (!role) return interaction.reply({ content: "Couldn't find a role named **Muted**.", ephemeral: true });
+
+    await target.roles.remove(role).catch(err => console.log(err));
+    await interaction.reply(`🔊 **${target.user.tag}** has been unmuted.`);
+  }
+};

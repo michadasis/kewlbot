@@ -1,28 +1,27 @@
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
-  name: "eval",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('eval')
+    .setDescription('Evaluate code (owner only)')
+    .addStringOption(opt => opt.setName('code').setDescription('Code to evaluate').setRequired(true)),
 
-  async run(client, message, args) {
-    const clean = text => {
-        if (typeof(text) === "string")
-          return text.replace(/`/g, "`" + String.fromCharCode(8203)).replace(/@/g, "@" + String.fromCharCode(8203));
-        else
-            return text;
-      }
-    if(message.author.id !== "494105564335308811") return;
+  async run(client, interaction) {
+    if (interaction.user.id !== "494105564335308811") {
+      return interaction.reply({ content: "You are not the owner of this bot.", ephemeral: true });
+    }
+
+    const clean = text => typeof text === "string"
+      ? text.replace(/`/g, "`\u200B").replace(/@/g, "@\u200B")
+      : text;
+
     try {
-      const code = args.join(" ");
+      const code = interaction.options.getString('code');
       let evaled = eval(code);
-    
-      if (typeof evaled !== "string")
-        evaled = require("util").inspect(evaled);
-    
-      message.channel.send(clean(evaled), {code:"xl"});
+      if (typeof evaled !== "string") evaled = require("util").inspect(evaled);
+      await interaction.reply({ content: `\`\`\`js\n${clean(evaled)}\n\`\`\``, ephemeral: true });
     } catch (err) {
-      message.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
+      await interaction.reply({ content: `\`ERROR\` \`\`\`js\n${clean(err)}\n\`\`\``, ephemeral: true });
     }
   }
-}
+};

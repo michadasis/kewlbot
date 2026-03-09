@@ -1,13 +1,12 @@
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
-  name: "afk",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('afk')
+    .setDescription('Set yourself as AFK'),
 
-  async run(client, message, args) {
-    message.member.setNickname(`[AFK]${message.author.username}`).catch(err => console.log(err))
-    message.channel.send(message.author + ' Is Now Idling');
-    console.log('KEWL BOT    | AFK COMMAND USED IN ' + message.guild.name)
+  async run(client, interaction) {
+    await interaction.member.setNickname(`[AFK] ${interaction.user.username}`).catch(() => {});
+    await interaction.reply(`${interaction.user} is now AFK.`);
   }
-}
+};

@@ -1,23 +1,22 @@
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
-  name: "mute",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('mute')
+    .setDescription('Mute a member')
+    .addUserOption(opt => opt.setName('user').setDescription('User to mute').setRequired(true))
+    .addStringOption(opt => opt.setName('reason').setDescription('Reason for mute'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
 
-  async run(client, message, args) {
-    if(!message.member.hasPermission(["MANAGE_ROLES"])) return message.channel.send("You do not have permission to perform this command!")
-        var person  = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[1]));
-        if(!person) return  message.reply("Sorry I can't Find " + person + " 😅")
- 
-            let role = message.guild.roles.cache.find(role => role.name === "Muted")
-           
-            if(!role) return message.reply(" Couldn't find the muted role.").catch(err => console.log(err))
+  async run(client, interaction) {
+    const target = interaction.options.getMember('user');
+    const reason = interaction.options.getString('reason') || 'No reason given.';
+    if (!target) return interaction.reply({ content: "User not found.", ephemeral: true });
 
-            person.roles.add(role.id).catch(err => console.log(err));
+    const role = interaction.guild.roles.cache.find(r => r.name === "Muted");
+    if (!role) return interaction.reply({ content: "Couldn't find a role named **Muted**. Please create one.", ephemeral: true });
 
-            message.channel.send(`@${person.user.tag} has been muted.`).catch(err => console.log(err))
-
-            console.log('KEWL BOT    | MUTE COMMAND USED IN ' + message.guild.name)
+    await target.roles.add(role, reason).catch(err => console.log(err));
+    await interaction.reply(`🔇 **${target.user.tag}** has been muted. Reason: ${reason}`);
   }
-}
+};

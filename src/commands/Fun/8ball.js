@@ -1,37 +1,22 @@
-
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
-  name: "8ball",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('8ball')
+    .setDescription('Ask the magic 8ball a question')
+    .addStringOption(opt => opt.setName('question').setDescription('Your question').setRequired(true)),
 
-  async run(client, message, args) {
-    let eightballwords = [ 
-        'It is certain.',
-        'It is decidedly so.',
-        'Without a doubt.',
-        'Yes – definitely.',
-        'You may rely on it.',
-        'As I see it, yes.',
-        'Most likely.',
-        'Outlook good.',
-        'Yes.',
-        'Signs point to yes.',
-        'Reply hazy, try again.',
-        'Ask again later.',
-        'Better not tell you now.',
-        'Cannot predict now.',
-        'Concentrate and ask again.',
-        'Don’t count on it.',
-        'My reply is no.',
-        'My sources say no.',
-        'Outlook not so good.',
-        'Very doubtful.'
-    ]
-    let eightballre = eightballwords[Math.floor(Math.random() * eightballwords.length)]
-    message.reply(eightballre).catch(err => console.log(err))
-
-    console.log('KEWL BOT    | 8BALL COMMAND USED IN ' + message.guild.name)
+  async run(client, interaction) {
+    const answers = [
+      'It is certain.', 'It is decidedly so.', 'Without a doubt.',
+      'Yes – definitely.', 'You may rely on it.', 'As I see it, yes.',
+      'Most likely.', 'Outlook good.', 'Yes.', 'Signs point to yes.',
+      'Reply hazy, try again.', 'Ask again later.', 'Better not tell you now.',
+      'Cannot predict now.', 'Concentrate and ask again.',
+      "Don't count on it.", 'My reply is no.', 'My sources say no.',
+      'Outlook not so good.', 'Very doubtful.'
+    ];
+    const answer = answers[Math.floor(Math.random() * answers.length)];
+    await interaction.reply(`🎱 ${answer}`);
   }
-}
+};

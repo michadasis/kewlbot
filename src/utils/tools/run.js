@@ -1,17 +1,15 @@
-const commands = require('./resources/commands')
-const events = require('./resources/events')
-const server = require('./resources/server')
+const commands = require('./resources/commands');
+const events = require('./resources/events');
+const server = require('./resources/server');
+const ascii = require('ascii-table');
 
-const ascii = require('ascii-table')
-
-module.exports = (client) => {
+module.exports = async (client) => {
   let table = new ascii("Client");
   table.setHeading('Load status');
-  table.addRow('✅')
+  table.addRow('✅');
+  console.log(table.toString());
 
-  console.log(table.toString())
-
-  commands(client)
-  events(client)
-  server()
-}
+  await commands(client);
+  events(client);
+  server();
+};

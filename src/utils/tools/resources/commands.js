@@ -1,45 +1,51 @@
-const { Collection } = require("discord.js");
+const { Collection, REST, Routes } = require("discord.js");
 const fs = require("fs");
-const { prefix } = require("../../config/config.json");
 const ascii = require("ascii-table");
+require('dotenv').config();
 
-module.exports = (client) => {
-	let table = new ascii("Commands");
-	table.setHeading("Command", " Load status");
+module.exports = async (client) => {
+  let table = new ascii("Commands");
+  table.setHeading("Command", "Load status");
 
-	client.commands = new Collection();
+  client.commands = new Collection();
+  const slashCommands = [];
 
-	fs.readdirSync(`./src/commands/`).forEach((dir) => {
-		const directories = fs.readdirSync(`./src/commands/${dir}`).filter((file) => file.endsWith('.js'))
-		for(let file of directories) {
-			const command = require(`../../../commands/${dir}/${file}`)
+  const dirs = fs.readdirSync(`./src/commands/`).filter(d =>
+    fs.statSync(`./src/commands/${d}`).isDirectory()
+  );
 
-			table.addRow(file, "✅");
-	
-			client.commands.set(command.name, command);
-		}
-	})
+  for (const dir of dirs) {
+    const files = fs.readdirSync(`./src/commands/${dir}`).filter(f => f.endsWith('.js'));
+    for (const file of files) {
+      try {
+        const command = require(`../../../commands/${dir}/${file}`);
+        if (!command.data || !command.data.name) {
+          console.warn(`⚠️  Skipping ${file} — missing 'data' property (old prefix command?)`);
+          table.addRow(file, "⚠️ skipped");
+          continue;
+        }
+        client.commands.set(command.data.name, command);
+        slashCommands.push(command.data.toJSON());
+        table.addRow(file, "✅");
+      } catch (err) {
+        console.error(`❌ Failed to load ${file}:`, err.message);
+        table.addRow(file, "❌ error");
+      }
+    }
+  }
 
-	console.log(table.toString());
+  console.log(table.toString());
 
-	client.on("message", async(message) => {
-			if (message.author.bot) return;
-			if (message.channel.type === "dm") return;
-			if (message.content.indexOf(prefix) !== 0) return;
-
-			const args = message.content.slice(prefix.length).trim().split(/ +/g);
-			const commandName = args.shift().toLowerCase();
-
-			const command =
-				client.commands.get(commandName) ||
-				client.commands.find(command => command.aliases && command.aliases.includes(commandName));
-
-			if (!command) return message.channel.send({ embed: { color: `000000`, description: "That is not a valid command!" } });
-
-			try {
-				command.run(client, message, args);
-			} catch (error) {
-				console.log(error);
-			}
-		})
+  // Register slash commands globally
+  const rest = new REST({ version: '10' }).setToken(process.env.token);
+  try {
+    console.log(`KEWL BOT    | Registering ${slashCommands.length} slash commands...`);
+    await rest.put(
+      Routes.applicationCommands(process.env.clientId),
+      { body: slashCommands }
+    );
+    console.log(`KEWL BOT    | Slash commands registered!`);
+  } catch (error) {
+    console.error("KEWL BOT    | Failed to register slash commands:", error);
+  }
 };

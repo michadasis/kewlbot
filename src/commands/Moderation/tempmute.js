@@ -1,37 +1,33 @@
-
-const { MessageEmbed } = require('discord.js')
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const ms = require('ms');
 
 module.exports = {
-  name: "tempmute",
-  description: " ",
+  data: new SlashCommandBuilder()
+    .setName('tempmute')
+    .setDescription('Temporarily mute a member')
+    .addUserOption(opt => opt.setName('user').setDescription('User to mute').setRequired(true))
+    .addStringOption(opt => opt.setName('duration').setDescription('Duration e.g. 1h, 30m, 1d').setRequired(true))
+    .addStringOption(opt => opt.setName('reason').setDescription('Reason for mute'))
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles),
 
-  async run(client, message, args) {
-    if(!message.member.hasPermission(["MANAGE_ROLES"])) return message.channel.send("You do not have permission to perform this command!")
-        var person  = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[0]));
-            if(!person) return  message.reply("Sorry I can't Find " + person + "😅").catch(err => console.log(err))
- 
-            let role = message.guild.roles.cache.find(role => role.name === "Muted")
-           
-            if(!role) return message.channel.send(message.author + " Couldn't find the mute role.").catch(err => console.log(err));
- 
- 
-            let time = args[1];
-            if(!time){
-                return message.reply("You didn't specify a time!").catch(err => console.log(err));
-            }
- 
-            person.roles.add(role.id).catch(err => console.log(err));
- 
- 
-            message.channel.send(`@${person.user.tag} has now been muted for ${ms(ms(time))}`)
- 
-            setTimeout(function(){
-               
-                person.roles.remove(role.id).catch(err => console.log(err));
-                message.channel.send(`@${person.user.tag} has been unmuted.`).catch(err => console.log(err))
-            }, ms(time));
- 
-            console.log('KEWL BOT    | TEMPMUTE COMMAND USED IN ' + message.guild.name)
+  async run(client, interaction) {
+    const target = interaction.options.getMember('user');
+    const duration = interaction.options.getString('duration');
+    const reason = interaction.options.getString('reason') || 'No reason given.';
+    const time = ms(duration);
+
+    if (!target) return interaction.reply({ content: "User not found.", ephemeral: true });
+    if (!time) return interaction.reply({ content: "Invalid duration. Use formats like `1h`, `30m`, `1d`.", ephemeral: true });
+
+    const role = interaction.guild.roles.cache.find(r => r.name === "Muted");
+    if (!role) return interaction.reply({ content: "Couldn't find a role named **Muted**.", ephemeral: true });
+
+    await target.roles.add(role, reason);
+    await interaction.reply(`🔇 **${target.user.tag}** has been temp-muted for **${ms(time, { long: true })}**. Reason: ${reason}`);
+
+    setTimeout(async () => {
+      await target.roles.remove(role).catch(() => {});
+      await interaction.channel.send(`🔊 **${target.user.tag}**'s temp-mute has expired.`).catch(() => {});
+    }, time);
   }
-}
+};
