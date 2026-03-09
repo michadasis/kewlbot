@@ -171,4 +171,4 @@ The bot requires the following Discord permissions to function fully:
 
 ## License
 
-MIT -- created by **michadasis**
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
